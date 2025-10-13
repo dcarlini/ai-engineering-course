@@ -1,0 +1,6 @@
+// ignore virtual environment files
+**/.venv
+capstone-forest_shuffle/data/
+__pycache__/
+models/
+**/.DS_Store

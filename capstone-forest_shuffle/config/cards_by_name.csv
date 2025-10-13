@@ -1,0 +1,97 @@
+card_name,type_1,type_2,suit,expansion
+Silver Fir,Tree,,Silver Fir,Base
+Douglas Fir,Tree,,Douglas Fir,Base
+Sycamore,Tree,,Sycamore,Base
+Birch,Tree,,Birch,Base
+Beech,Tree,,Beech,Base
+Horse Chestnut,Tree,,Horse Chestnut,Base
+Oak,Tree,,Oak,Base
+Linden,Tree,,Linden,Base
+European Larch,Tree,,European Larch,Alpine 
+Stone Pine,Tree,,Stone Pine,Alpine
+Blackthorn,Shrub,,,Woodland Edge
+Common Hazel,Shrub,,,Woodland Edge
+Elderberry,Shrub,,,Woodland Edge
+Tree Ferns,Plant,,,Base
+Wild Strawberries,Plant,,,Base
+Blackberries,Plant,,,Base
+Moss,Plant,,,Base
+Gentian,Plant,,,Alpine
+Blueberry,Plant,,,Alpine
+Edelweiss,Plant,,,Alpine
+Digitalis,Plant,,,Woodland Edge
+Stinging Nettle,Plant,,,Woodland Edge
+Roe Deer,Cloven-Hoofed Animal,Deer,,Base
+Red Deer,Cloven-Hoofed Animal,Deer,,Base
+Wild Boar,Cloven-Hoofed Animal,,,Base
+Squeaker,Cloven-Hoofed Animal,,,Base
+Fallow Deer,Cloven-Hoofed Animal,Deer,,Base
+Beech Marten,Pawed Animal,,,Base
+European Fat Dormouse,Pawed Animal,,,Base
+Lynx,Pawed Animal,,,Base
+European Hare,Pawed Animal,,,Base
+Wolf,Pawed Animal,,,Base
+Brown Bear,Pawed Animal,,,Base
+Raccoon,Pawed Animal,,,Base
+Hedgehog,Pawed Animal,,,Base
+Red Squirrel,Pawed Animal,,,Base
+European Badger,Pawed Animal,,,Base
+Mole,Pawed Animal,,,Base
+Red Fox,Pawed Animal,,,Base
+Alpine Marmot,Pawed Animal,,,Alpine
+Mountain Hare,Pawed Animal,,,Alpine
+Chamois,Cloven-Hoofed Animal,,,Alpine
+Steinbock,Cloven-Hoofed Animal,,,Alpine
+European Bison,Cloven-Hoofed Animal,,,Woodland Edge
+European Polcat,Pawed Animal,,,Woodland Edge
+European Wildcat,Pawed Animal,,,Woodland Edge
+Water Vole,Pawed Animal,,,Woodland Edge
+Wild Boar (female),Cloven-Hoofed Animal,,,Woodland Edge
+Wild Boar (young),Cloven-Hoofed Animal,,,Woodland Edge
+Barbastelle Bat,Bat,,,Base
+Greater Horse-shoe Bat,Bat,,,Base
+Brown Long-Eared Bat,Bat,,,Base
+Bechstein's Bat,Bat,,,Base
+Savi's Pipistrelle,Bat,,,Alpine
+Dwarven Bat,Bat,,,Woodland Edge
+Common Pipistrelle,Bat,,,Woodland Edge
+Tawny owl,Bird,,,Base
+Bullfinch,Bird,,,Base
+Goshawk,Bird,,,Base
+Chaffinch,Bird,,,Base
+Eurasian Jay,Bird,,,Base
+Great Spotted Woodpecker,Bird,,,Base
+Golden Eagle,Bird,,,Alpine
+Common Raven,Bird,,,Alpine
+Capercaillie,Bird,,,Alpine
+Bearded Volture,Bird,,,Alpine
+Barn Owl,Bird,,,Woodland Edge
+Nightingale,Bird,,,Woodland Edge
+Eurasian Magpie,Bird,,,Woodland Edge
+Tree Frog,Amphibian,,,Base
+Common Toad,Amphibian,,,Base
+Fire Salamander,Amphibian,,,Base
+Pond Turtle,Amphibian,,,Base
+Alpine Newt,Amphibian,,,Alpine
+Fly Agaric,Mushroom,,,Base
+Chanterelle,Mushroom,,,Base
+Parasol Mushroom,Mushroom,,,Base
+Penny Bun,Mushroom,,,Base
+Black Trumpet,Mushroom,,,Alpine
+Violet Carpenter Bee,Insect,,,Base
+Stag Beetle,Insect,,,Base
+Wood Ant,Insect,,,Base
+Fireflies,Insect,,,Base
+Gnat,Insect,,,Base
+European Bee,Insect,,,Woodland Edge
+Bee Swarm,Insect,,,Woodland Edge
+Crane Fly,Insect,,,Woodland Edge
+Great Green Bush-Cricket,Insect,,,Woodland Edge
+Tipula,Insect,,,Woodland Edge
+Camberwell Beauty,Insect,Butterfly,,Base
+Silver-Washed Fritillary,Insect,Butterfly,,Base
+Purple Emperor,Insect,Butterfly,,Base
+Peacock Butterfly,Insect,Butterfly,,Base
+Large Tortoiseshell,Insect,Butterfly,,Base
+Phoebus Apollo,Insect,Butterfly,,Alpine
+Map Butterfly,Insect,Butterfly,,Woodland Edge
