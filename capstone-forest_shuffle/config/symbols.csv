@@ -4,20 +4,23 @@ types,amphibian.png,Amphibian
 types,tree.png,Tree
 types,bat.png,Bat
 types,insect.png,Insect
-types,cloven-hoofed.png,Cloven-Hoofed Animal
+types,clovenHoofedAnimal.png,Cloven-Hoofed Animal
 types,plant.png,Plant
-types,pawed.png,Pawed Animal
+types,pawedAnimal.png,Pawed Animal
 types,mushroom.png,Mushroom
 types,butterfly.png,Butterfly
 types,bird.png,Bird
 types,shrub.png,Shrub
+types,sapling.png,Sapling
 expansion,alps.png,Alpine
-expansion,woodland.png,Woodland Edge
-suit,silver_fir.png,Silver Fir
-suit,douglas_fir.png,Douglas Fir
+expansion,woodlandEdge.png,Woodland Edge
+suit,silverFir.png,Silver Fir
+suit,douglasFir.png,Douglas Fir
 suit,sycamore.png,Sycamore
 suit,birch.png,Birch
 suit,beech.png,Beech
-suit,horse_chestnut.png,Horse Chestnut
+suit,horseChestnut.png,Horse Chestnut
 suit,oak.png,Oak
-suit,linden.jpg,Linden
+suit,linden.png,Linden
+suit,europeanLarch.png,European Larch
+suit,stonePine.png,Stone Pine
