@@ -10,7 +10,7 @@ import argparse
 from sklearn.model_selection import train_test_split # Added import
 from model_architecture import MultiOutputModel # Added import
 
-class CardPredictor:
+class ModelPredictor:
     """
     A class to load a trained multi-output model and make predictions.
     """
@@ -82,7 +82,7 @@ def main():
     parser.add_argument('image_path', type=str, help='Path to the input image file for single prediction.')
     args = parser.parse_args()
 
-    predictor = CardPredictor() # Initialize the predictor
+    predictor = ModelPredictor() # Initialize the predictor
 
     predictions = predictor.predict(args.image_path)
     print("\n--- Prediction Results ---")

@@ -3,16 +3,23 @@ import json
 import torch
 import argparse
 from sklearn.model_selection import train_test_split
-from card_predictor import CardPredictor # Import CardPredictor
+from model_predictor import CardPredictor
+from clip_predictor import ClipPredictor # Import ClipPredictor
 
 def main():
-    parser = argparse.ArgumentParser(description='Evaluate a trained multi-output model on the validation set.')
+    parser = argparse.ArgumentParser(description='Evaluate a trained multi-output model or CLIP on the validation set.')
     parser.add_argument('--verbose_eval', action='store_true', help='Print individual predictions during evaluation.')
+    parser.add_argument('--use_clip', action='store_true', help='Use CLIP for prediction instead of the trained multi-output model.')
     args = parser.parse_args()
 
-    predictor = CardPredictor() # Initialize the predictor
+    if args.use_clip:
+        predictor = ClipPredictor()
+        # For CLIP, we will evaluate all labels returned by the predictor
+        active_label_categories = ['name', 'types', 'suit', 'expansion']
+    else:
+        predictor = ModelPredictor()
+        active_label_categories = predictor.active_label_categories
 
-    # The evaluation logic from CardPredictor.evaluate()
     manifest_path = 'data/manifest.json'
     test_size = 0.2
     random_state = 42
@@ -28,24 +35,30 @@ def main():
     # Filter out items where 'name' is 'None' as they are not valid training samples
     manifest_data = [item for item in manifest_data if item['labels']['name'] != 'None']
 
-    # Convert labels in manifest_data to indices for comparison
+    # Prepare ground truth labels for comparison
+    # For MultiOutputModel, convert to indices. For CLIP, keep as strings/lists.
+    # We need to ensure ground_truth_labels are consistent for comparison
+    processed_manifest_data = []
     for item in manifest_data:
-        for key in predictor.active_label_categories:
-            if key == 'types':
-                type_indices = [predictor.label_maps['types'].index(t) for t in item['labels']['types'] if t != 'None']
-                multi_hot_types = torch.zeros(len(predictor.label_maps['types']), dtype=torch.float)
-                multi_hot_types[type_indices] = 1.0
-                item['labels'][key] = multi_hot_types
-            else:
-                label = item['labels'][key]
-                if label != 'None':
-                    item['labels'][key] = predictor.label_maps[key].index(label)
+        processed_item = item.copy()
+        if not args.use_clip:
+            for key in active_label_categories:
+                if key == 'types':
+                    type_indices = [predictor.label_maps['types'].index(t) for t in item['labels']['types'] if t != 'None']
+                    multi_hot_types = torch.zeros(len(predictor.label_maps['types']), dtype=torch.float)
+                    multi_hot_types[type_indices] = 1.0
+                    processed_item['labels'][key] = multi_hot_types
                 else:
-                    item['labels'][key] = -1
+                    label = item['labels'][key]
+                    if label != 'None':
+                        processed_item['labels'][key] = predictor.label_maps[key].index(label)
+                    else:
+                        processed_item['labels'][key] = -1
+        processed_manifest_data.append(processed_item)
 
-    _, val_data = train_test_split(manifest_data, test_size=test_size, random_state=random_state)
+    _, val_data = train_test_split(processed_manifest_data, test_size=test_size, random_state=random_state)
 
-    correct_predictions = {key: 0 for key in predictor.active_label_categories}
+    correct_predictions = {key: 0 for key in active_label_categories}
     total_samples = len(val_data)
 
     for item in val_data:
@@ -55,14 +68,14 @@ def main():
         predictions = predictor.predict(image_path) # Use the class's predict method
 
         if verbose_eval:
-            # Create a human-readable version of ground_truth_labels for printing
             readable_ground_truth = {}
-            for key in predictor.active_label_categories:
+            for key in active_label_categories:
                 value = ground_truth_labels[key]
-                if key == 'name' and value != -1:
+                if args.use_clip: # CLIP predictions are already strings/lists
+                    readable_ground_truth[key] = value
+                elif key == 'name' and value != -1:
                     readable_ground_truth[key] = predictor.label_maps[key][value]
                 elif key == 'types':
-                    # For types, convert multi-hot tensor back to list of names
                     readable_types = [predictor.label_maps[key][i] for i, v in enumerate(value) if v == 1.0]
                     readable_ground_truth[key] = readable_types if readable_types else ["None"]
                 elif value != -1:
@@ -74,8 +87,20 @@ def main():
             print(f"  Ground Truth: {readable_ground_truth}")
             print(f"  Prediction:   {predictions}")
 
-        for key in predictor.active_label_categories:
-            if key == 'types':
+        for key in active_label_categories:
+            if args.use_clip:
+                # For CLIP, predictions[key] is already the string/list label
+                # Handle 'types' as a list comparison
+                if key == 'types':
+                    # Ensure both are sorted for consistent comparison
+                    gt_types = sorted([t for t in ground_truth_labels.get(key, []) if t != 'None'])
+                    pred_types = sorted([t for t in predictions.get(key, []) if t != 'None'])
+                    if gt_types == pred_types:
+                        correct_predictions[key] += 1
+                else:
+                    if predictions.get(key) == ground_truth_labels.get(key):
+                        correct_predictions[key] += 1
+            elif key == 'types':
                 predicted_multi_hot = torch.zeros(len(predictor.label_maps['types']), dtype=torch.float)
                 for p_label in predictions[key]:
                     if p_label != "None":
@@ -89,7 +114,7 @@ def main():
                     correct_predictions[key] += 1
     
     print("\n--- Evaluation Results ---")
-    for key in predictor.active_label_categories:
+    for key in active_label_categories:
         accuracy = correct_predictions[key] / total_samples
         print(f"{key.capitalize()} Accuracy: {accuracy:.4f}")
 

@@ -7,3 +7,4 @@ filelock
 easyocr
 rapidfuzz
 pandas
+openai-clip
