@@ -6,3 +6,4 @@ Pillow
 filelock
 easyocr
 rapidfuzz
+pandas

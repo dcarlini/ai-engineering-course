@@ -4,7 +4,7 @@ import shutil
 from sklearn.model_selection import train_test_split
 from torchvision.io import read_image, write_jpeg # Assuming torchvision is installed
 import sys
-
+import json
 import csv
 import re
 from card_data_manager import CardCollection
@@ -465,7 +465,40 @@ class DataPreparation:
                     
         print("Individual label datasets preparation complete.")
 
-    
+    def create_manifest(self):
+        print("Creating manifest file...")
+        manifest_data = []
+        
+        # Create a quick lookup for file paths
+        filepath_map = {}
+        for root, _, files in os.walk(self.processed_cards_dir):
+            for file in files:
+                filepath_map[file] = os.path.join(root, file)
+
+        for filename, labels in self.card_names.items():
+            if filename in filepath_map and labels.get('name') != 'None':
+                types_list = []
+                if labels.get('type_1') and labels['type_1'] != 'None':
+                    types_list.append(labels['type_1'])
+                if labels.get('type_2') and labels['type_2'] != 'None':
+                    types_list.append(labels['type_2'])
+
+                manifest_entry = {
+                    'file_path': filepath_map[filename],
+                    'labels': {
+                        'name': labels.get('name'),
+                        'types': types_list,
+                        'suit': labels.get('suit'),
+                        'expansion': labels.get('expansion')
+                    }
+                }
+                manifest_data.append(manifest_entry)
+
+        manifest_path = os.path.join(self.main_data_root, 'manifest.json')
+        with open(manifest_path, 'w') as f:
+            json.dump(manifest_data, f, indent=4)
+        
+        print(f"Manifest file created at {manifest_path}")
 
     def run_all_preparation(self):
         self._cleanup()
@@ -484,6 +517,7 @@ class DataPreparation:
         # generate_card_names_config()
         
         self.load_card_names()
+        self.create_manifest()
 
 if __name__ == '__main__':
     dp = DataPreparation()
