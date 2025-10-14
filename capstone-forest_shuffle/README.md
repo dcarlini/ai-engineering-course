@@ -138,5 +138,4 @@ Replace `<path_to_your_image.jpg>` with the actual path to the image file you wa
 -   **Improve `types` accuracy:** Investigate the low accuracy for multi-label 'types' prediction. This might involve adjusting the loss function, model architecture, or data augmentation strategies.
 -   **Re-introduce `suit` prediction:** If `suit` information becomes available or is deemed important, re-integrate it into the training and prediction pipeline.
 -   **Web Service Integration:** Develop a simple web service (e.g., using Flask or FastAPI) to expose the prediction functionality via an API.
--   **More Robust Evaluation Metrics:** Implement more advanced multi-label evaluation metrics (e.g., F1-score, Jaccard index) for the 'types' category.
--   **Hyperparameter Tuning:** Optimize training parameters (learning rate, batch size, epochs) using techniques like grid search or random search.
+-   **Support images with multiple cards** - Forest Shuffle allows cards to be generated in a middle card (tree) and then 1 or more cards to the top/bottom/right or left.  
