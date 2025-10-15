@@ -3,22 +3,46 @@ import json
 import torch
 import argparse
 from sklearn.model_selection import train_test_split
-from model_predictor import CardPredictor
-from clip_predictor import ClipPredictor # Import ClipPredictor
+from model_predictor import ModelPredictor
+from clip_predictor import ClipPredictor
+from base_predictor import BasePredictor # New import
+from PIL import Image # Import Image for predict_single_card
+from layout_configs import PREDEFINED_LAYOUTS # New import
 
 def main():
     parser = argparse.ArgumentParser(description='Evaluate a trained multi-output model or CLIP on the validation set.')
     parser.add_argument('--verbose_eval', action='store_true', help='Print individual predictions during evaluation.')
     parser.add_argument('--use_clip', action='store_true', help='Use CLIP for prediction instead of the trained multi-output model.')
+    parser.add_argument('--multi_card_image_path', type=str, help='Path to an image file containing multiple cards for testing.')
+    parser.add_argument('--layout_name', type=str, help='Name of a predefined layout from layout_configs.py (e.g., "horizontal_split").')
     args = parser.parse_args()
 
     if args.use_clip:
-        predictor = ClipPredictor()
-        # For CLIP, we will evaluate all labels returned by the predictor
+        predictor: BasePredictor = ClipPredictor()
         active_label_categories = ['name', 'types', 'suit', 'expansion']
     else:
-        predictor = ModelPredictor()
+        predictor: BasePredictor = ModelPredictor()
+        # ModelPredictor has these attributes after _load_model
         active_label_categories = predictor.active_label_categories
+
+    if args.multi_card_image_path:
+        if not args.layout_name:
+            print("Error: --layout_name is required for --multi_card_image_path.")
+            return
+        if args.layout_name not in PREDEFINED_LAYOUTS:
+            print(f"Error: Unknown layout name: {args.layout_name}. Available layouts: {list(PREDEFINED_LAYOUTS.keys())}")
+            return
+        
+        all_predictions = predictor.predict_multi_card_image(args.multi_card_image_path, layout_config=PREDEFINED_LAYOUTS[args.layout_name])
+        print("\n--- Multi-Card Image Prediction Results ---")
+        for i, predictions in enumerate(all_predictions):
+            print(f"Card {i+1}:")
+            for category, prediction in predictions.items():
+                if isinstance(prediction, list):
+                    print(f"  {category.capitalize()}: {', '.join(prediction) if prediction else 'None'}")
+                else:
+                    print(f"  {category.capitalize()}: {prediction}")
+        return # Exit after multi-card prediction
 
     manifest_path = 'data/manifest.json'
     test_size = 0.2
@@ -36,8 +60,7 @@ def main():
     manifest_data = [item for item in manifest_data if item['labels']['name'] != 'None']
 
     # Prepare ground truth labels for comparison
-    # For MultiOutputModel, convert to indices. For CLIP, keep as strings/lists.
-    # We need to ensure ground_truth_labels are consistent for comparison
+    # For ModelPredictor, convert to indices. For ClipPredictor, keep as strings/lists.
     processed_manifest_data = []
     for item in manifest_data:
         processed_item = item.copy()
@@ -65,7 +88,8 @@ def main():
         image_path = item['file_path']
         ground_truth_labels = item['labels']
         
-        predictions = predictor.predict(image_path) # Use the class's predict method
+        # Use predict_single_card from the BasePredictor interface
+        predictions = predictor.predict_single_card(Image.open(image_path))
 
         if verbose_eval:
             readable_ground_truth = {}
@@ -100,18 +124,20 @@ def main():
                 else:
                     if predictions.get(key) == ground_truth_labels.get(key):
                         correct_predictions[key] += 1
-            elif key == 'types':
-                predicted_multi_hot = torch.zeros(len(predictor.label_maps['types']), dtype=torch.float)
-                for p_label in predictions[key]:
-                    if p_label != "None":
-                        predicted_multi_hot[predictor.label_maps['types'].index(p_label)] = 1.0
-                
-                if torch.equal(predicted_multi_hot, ground_truth_labels[key]):
-                    correct_predictions[key] += 1
-            else:
-                # Only compare if ground_truth_labels[key] is not -1 (i.e., a valid label)
-                if ground_truth_labels[key] != -1 and predictions[key] == predictor.label_maps[key][ground_truth_labels[key]]:
-                    correct_predictions[key] += 1
+            else: # For MultiOutputModel
+                if key == 'types':
+                    predicted_multi_hot = torch.zeros(len(predictor.label_maps['types']), dtype=torch.float)
+                    for p_label in predictions[key]: # predictions[key] is a list of strings here
+                        if p_label != "None":
+                            predicted_multi_hot[predictor.label_maps['types'].index(p_label)] = 1.0
+                    
+                    if torch.equal(predicted_multi_hot, ground_truth_labels[key]):
+                        correct_predictions[key] += 1
+                else:
+                    # Only compare if ground_truth_labels[key] is not -1 (i.e., a valid label)
+                    # predictions[key] is a string, ground_truth_labels[key] is an index
+                    if ground_truth_labels[key] != -1 and predictions[key] == predictor.label_maps[key][ground_truth_labels[key]]:
+                        correct_predictions[key] += 1
     
     print("\n--- Evaluation Results ---")
     for key in active_label_categories:

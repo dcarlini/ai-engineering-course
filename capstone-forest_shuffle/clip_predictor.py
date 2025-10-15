@@ -4,17 +4,17 @@ from PIL import Image
 import os
 import json
 import numpy as np
-import argparse # Import argparse
+import argparse
 from sklearn.metrics.pairwise import cosine_similarity
+from base_predictor import BasePredictor # New import
 
-class ClipPredictor:
+class ClipPredictor(BasePredictor):
     def __init__(self, manifest_path='data/manifest.json'):
+        super().__init__() # Initialize BasePredictor
         self.manifest_path = manifest_path
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        if self.device == "cpu" and torch.backends.mps.is_available():
-            self.device = "mps"
-        print(f"Using device for CLIP: {self.device}")
+        self._load_model() # Call _load_model after manifest_path is set
 
+    def _load_model(self):
         self.model, self.preprocess = clip.load("ViT-B/32", device=self.device)
         self.precomputed_image_features, self.precomputed_labels = self._precompute_image_features_and_labels()
 
@@ -61,11 +61,9 @@ class ClipPredictor:
         print(f"Precomputed {len(labels_list)} image features.")
         return precomputed_image_features, labels_list
 
-    def predict(self, image_path):
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Image file not found at {image_path}.")
-
-        image = self.preprocess(Image.open(image_path)).unsqueeze(0).to(self.device)
+    def predict_single_card(self, pil_image: Image.Image):
+        """Predicts labels for a single PIL Image object."""
+        image = self.preprocess(pil_image).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             query_image_feature = self.model.encode_image(image)
@@ -79,16 +77,3 @@ class ClipPredictor:
         predicted_labels = self.precomputed_labels[indices[0].item()]
         return predicted_labels
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Predict card attributes from an image using CLIP.')
-    parser.add_argument('image_path', type=str, help='Path to the input image file for single prediction.')
-    args = parser.parse_args()
-
-    clip_predictor = ClipPredictor()
-    predictions = clip_predictor.predict(args.image_path)
-    print("\n--- CLIP Prediction Results ---")
-    for category, prediction in predictions.items():
-        if isinstance(prediction, list):
-            print(f"{category.capitalize()}: {', '.join(prediction) if prediction else 'None'}")
-        else:
-            print(f"{category.capitalize()}: {prediction}")

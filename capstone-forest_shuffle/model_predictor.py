@@ -1,5 +1,3 @@
-
-
 import os
 import json
 import torch
@@ -7,27 +5,29 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 import argparse
-from sklearn.model_selection import train_test_split # Added import
-from model_architecture import MultiOutputModel # Added import
+from sklearn.model_selection import train_test_split
+from model_architecture import MultiOutputModel
+from base_predictor import BasePredictor # New import
+from clip_predictor import ClipPredictor # New import
 
-class ModelPredictor:
+class ModelPredictor(BasePredictor):
     """
     A class to load a trained multi-output model and make predictions.
     """
     def __init__(self, models_dir='models'):
-        self.models_dir = models_dir
+        super().__init__() # Initialize BasePredictor
+        self.models_dir = models_dir # Set models_dir here
         self.model = None
         self.label_maps = None
         self.num_classes_dict = None
         self.active_label_categories = None
-        self.device = None
         self.transform = transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
-        self._load_model()
+        self._load_model() # Call _load_model after models_dir is set
 
     def _load_model(self):
         model_path = os.path.join(self.models_dir, 'multi_output_model.pth')
@@ -44,22 +44,13 @@ class ModelPredictor:
         self.num_classes_dict = {key: len(labels) for key, labels in self.label_maps.items()}
         self.active_label_categories = list(self.label_maps.keys())
 
-        if torch.backends.mps.is_available():
-            self.device = torch.device("mps")
-        elif torch.cuda.is_available():
-            self.device = torch.device("cuda")
-        else:
-            self.device = torch.device("cpu")
-        print(f"Using device: {self.device}")
-
         self.model = MultiOutputModel(self.num_classes_dict).to(self.device)
         self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.eval() # Set model to evaluation mode
 
-    def predict(self, image_path):
-        """Predicts the labels of a single image."""
-        image = Image.open(image_path).convert('RGB')
-        image = self.transform(image).unsqueeze(0).to(self.device)
+    def predict_single_card(self, pil_image: Image.Image):
+        """Predicts the labels of a single PIL Image object."""
+        image = self.transform(pil_image).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             outputs = self.model(image)
@@ -77,17 +68,3 @@ class ModelPredictor:
                 
         return predictions
 
-def main():
-    parser = argparse.ArgumentParser(description='Predict card attributes from an image using a trained multi-output model.')
-    parser.add_argument('image_path', type=str, help='Path to the input image file for single prediction.')
-    args = parser.parse_args()
-
-    predictor = ModelPredictor() # Initialize the predictor
-
-    predictions = predictor.predict(args.image_path)
-    print("\n--- Prediction Results ---")
-    for category, prediction in predictions.items():
-        print(f"{category.capitalize()}: {prediction}")
-
-if __name__ == '__main__':
-    main()

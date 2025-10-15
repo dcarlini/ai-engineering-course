@@ -10,8 +10,10 @@ This project aims to develop a machine learning model to recognize and classify 
 -   `model_architecture.py`: Defines the `MultiOutputModel` architecture, which uses a ResNet backbone with multiple output heads for different card attributes.
 -   `train_multi_output_model.py`: Script for training the multi-output model.
 -   `model_predictor.py`: Script for making predictions on single card images using the trained multi-output model.
--   `evaluate_model.py`: Script for evaluating the trained model's performance on a validation set.
 -   `clip_predictor.py`: Script for making predictions on single card images using the CLIP model (image-to-image retrieval).
+-   `base_predictor.py`: Abstract base class defining a common interface for predictors.
+-   `multi_card_image_processor.py`: Utility for processing images containing multiple cards.
+-   `run_predictor.py`: Centralized script for running single or multi-card predictions using either the multi-output model or CLIP.
 -   `requirements.txt`: Lists all Python dependencies.
 -   `config/`: Directory containing configuration CSVs and the training configuration JSON.
     -   `card_data.csv`: Defines how card sheets are split into individual cards.
@@ -117,25 +119,58 @@ To see individual predictions and ground truth during evaluation using CLIP:
 
 ### 4. Single Image Prediction
 
-Use either the trained multi-output model or the CLIP model to predict attributes for a single image.
+Use either the trained multi-output model or the CLIP model to predict attributes for a single image. You can also process images containing multiple cards using predefined layouts.
 
-**Predict with Trained Multi-Output Model:**
-
-```bash
-.venv/bin/python model_predictor.py <path_to_your_image.jpg>
-```
-
-**Predict with RAG using CLIP Model:**
+**Predict with Trained Multi-Output Model (Single Card):**
 
 ```bash
-.venv/bin/python clip_predictor.py <path_to_your_image.jpg>
+.venv/bin/python run_predictor.py <path_to_your_image.jpg>
 ```
 
-Replace `<path_to_your_image.jpg>` with the actual path to the image file you want to predict on.
+Example:
+```bash
+.venv/bin/python run_predictor.py ./data/processed_cards/hCards/hCards_0_0_left.jpg
+```
+
+**Predict with RAG using CLIP Model (Single Card):**
+
+```bash
+.venv/bin/python run_predictor.py <path_to_your_image.jpg> --use_clip
+```
+
+Example:
+```bash
+.venv/bin/python run_predictor.py ./data/processed_cards/hCards/hCards_0_0_left.jpg --use_clip
+```
+
+**Predict Multiple Cards with Multi-Output Model (Horizontal Split Example):**
+
+```bash
+.venv/bin/python run_predictor.py <path_to_your_multi_card_image.jpg> --layout_name horizontal_split
+```
+
+Example:
+```bash
+.venv/bin/python run_predictor.py ./data/processed_cards/hCards/hCards_0_0.jpg --layout_name horizontal_split
+```
+
+**Predict Multiple Cards with CLIP (Vertical Split Example):**
+
+```bash
+.venv/bin/python run_predictor.py <path_to_your_multi_card_image.jpg> --layout_name vertical_split --use_clip
+```
+
+Example:
+```bash
+.venv/bin/python run_predictor.py ./data/processed_cards/hCards/hCards_0_0.jpg --layout_name vertical_split --use_clip
+```
+
+Replace `<path_to_your_image.jpg>` or `<path_to_your_multi_card_image.jpg>` with the actual path to the image file you want to predict on. For multi-card images, ensure the image dimensions and card arrangement are compatible with the chosen `layout_name` (defined in `layout_configs.py`).
 
 ## Future Improvements
 
 -   **Improve `types` accuracy:** Investigate the low accuracy for multi-label 'types' prediction. This might involve adjusting the loss function, model architecture, or data augmentation strategies.
 -   **Re-introduce `suit` prediction:** If `suit` information becomes available or is deemed important, re-integrate it into the training and prediction pipeline.
 -   **Web Service Integration:** Develop a simple web service (e.g., using Flask or FastAPI) to expose the prediction functionality via an API.
--   **Support images with multiple cards** - Forest Shuffle allows cards to be generated in a middle card (tree) and then 1 or more cards to the top/bottom/right or left.  
+-   **More Robust Evaluation Metrics:** Implement more advanced multi-label evaluation metrics (e.g., F1-score, Jaccard index) for the 'types' category.
+-   **Hyperparameter Tuning:** Optimize training parameters (learning rate, batch size, epochs) using techniques like grid search or random search.
