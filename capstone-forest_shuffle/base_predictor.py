@@ -2,6 +2,7 @@ import torch
 from abc import ABC, abstractmethod
 from multi_card_image_processor import MultiCardImageProcessor
 from PIL import Image
+import numpy as np
 
 class BasePredictor(ABC):
     def __init__(self):
@@ -9,6 +10,15 @@ class BasePredictor(ABC):
         if self.device == "cpu" and torch.backends.mps.is_available():
             self.device = "mps"
         print(f"Using device: {self.device}")
+
+    def is_blank(self, pil_image: Image.Image, threshold=5.0) -> bool:
+        """Checks if an image is mostly a single color."""
+        if pil_image is None:
+            return True
+        # Convert to grayscale and to a numpy array
+        image_np = np.array(pil_image.convert('L'))
+        # If the standard deviation is very low, the image is likely blank
+        return image_np.std() < threshold
 
     @abstractmethod
     def _load_model(self):

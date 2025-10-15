@@ -50,6 +50,9 @@ class ModelPredictor(BasePredictor):
 
     def predict_single_card(self, pil_image: Image.Image):
         """Predicts the labels of a single PIL Image object."""
+        if self.is_blank(pil_image):
+            return {}
+
         image = self.transform(pil_image).unsqueeze(0).to(self.device)
 
         with torch.no_grad():

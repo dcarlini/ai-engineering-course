@@ -63,6 +63,9 @@ class ClipPredictor(BasePredictor):
 
     def predict_single_card(self, pil_image: Image.Image):
         """Predicts labels for a single PIL Image object."""
+        if self.is_blank(pil_image):
+            return {}
+
         image = self.preprocess(pil_image).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
