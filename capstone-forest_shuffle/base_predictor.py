@@ -28,6 +28,9 @@ class BasePredictor(ABC):
         all_predictions = []
         for i, card_pil_image in enumerate(cropped_cards):
             print(f"Predicting for cropped card {i+1}...")
+            # Save the cropped card to disk for debugging
+            card_pil_image.save(f"debug_cropped_card_{i+1}.jpg")  
+            
             predictions = self.predict_single_card(card_pil_image)
             all_predictions.append(predictions)
         return all_predictions

@@ -1,3 +1,4 @@
+from email import generator
 import os
 import requests
 import shutil
@@ -9,6 +10,7 @@ import csv
 import re
 from card_data_manager import CardCollection
 from symbol_manager import SymbolCollection
+from multi_card_image_generator import MultiCardImageGenerator
 
 
 
@@ -518,6 +520,10 @@ class DataPreparation:
         
         self.load_card_names()
         self.create_manifest()
+
+        generator = MultiCardImageGenerator()
+        generated_images = generator.generate_five_card_cross_images(num_images=30)
+        print(f"Generated {len(generated_images)} five-card cross images.")
 
 if __name__ == '__main__':
     dp = DataPreparation()

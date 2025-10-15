@@ -28,7 +28,8 @@ def main():
         if not all_predictions:
             print("No cards detected or processed in the multi-card image with the given layout.")
             return
-        print("\n--- Multi-Card Image Prediction Results ---")
+        
+        print(f"\n--- Predictions for Multi-Card Image: {args.image_path} ---")
         for i, predictions in enumerate(all_predictions):
             print(f"Card {i+1}:")
             for category, prediction in predictions.items():
@@ -38,7 +39,7 @@ def main():
                     print(f"  {category.capitalize()}: {prediction}")
     else:
         predictions = predictor.predict_single_card(Image.open(args.image_path))
-        print("\n--- Prediction Results ---")
+        print(f"\n--- Predictions for Single Card Image: {args.image_path} ---")
         for category, prediction in predictions.items():
             if isinstance(prediction, list):
                 print(f"{category.capitalize()}: {', '.join(prediction) if prediction else 'None'}")
