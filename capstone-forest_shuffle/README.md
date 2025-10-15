@@ -162,7 +162,18 @@ Example:
 
 Example:
 ```bash
-.venv/bin/python run_predictor.py ./data/processed_cards/hCards/hCards_0_0.jpg --layout_name vertical_split --use_clip
+.venv/bin/python run_predictor.py ./data/processed_cards/vCards/vCards_0_0.jpg --layout_name vertical_split --use_clip
+```
+
+**Predict Multiple Cards with Multi-Output Model (Five-Card Cross Example):**
+
+```bash
+.venv/bin/python run_predictor.py <path_to_your_multi_card_image.jpg> --layout_name five_card_cross
+```
+
+Example:
+```bash
+.venv/bin/python run_predictor.py ./data/generated_multi_cards/five_card_cross_1.jpg --layout_name five_card_cross
 ```
 
 Replace `<path_to_your_image.jpg>` or `<path_to_your_multi_card_image.jpg>` with the actual path to the image file you want to predict on. For multi-card images, ensure the image dimensions and card arrangement are compatible with the chosen `layout_name` (defined in `layout_configs.py`).
